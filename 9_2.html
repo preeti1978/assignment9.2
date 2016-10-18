@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Registration Form and saving Form Data to Bootstrap table</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> </script>
+  <script type="text/javascript">
+    (function()
+    {
+        /*create an object named Applicant that has all the form fields as member variables*/
+        var Applicant = {
+            fname: "",
+            lname: "",
+            age: 0,
+            phonenum: "",
+            email: ""
+        };
+
+        /*create an object storageLogic which has a saveItem member function and loadData member function*/
+        var storageLogic = {
+
+        	/*saveItem is a function which populates the user inputs in the form to the javascript Applicant object*/
+            saveItem: function (){
+                var lscount = localStorage.length;
+                var inputs = document.getElementsByClassName("form-control");
+                Applicant.fname = inputs[0].value; //first input element of form is populated to fname member of Applicant object  
+                Applicant.lname = inputs[1].value; // second input element of form is populated to lname member of Applicant object
+                Applicant.age = inputs[2].value; //.. and so on
+                Applicant.phonenum = inputs[3].value;
+                Applicant.email = inputs[4].value;
+                
+                //storing the Applicant object to localStorage
+                localStorage.setItem("Applicant_" + lscount, JSON.stringify(Applicant));  //first entered form data is stored to localStorage item Applicant_1 etc.
+                //page refreshed
+                location.reload();
+
+            },
+
+            /*loadData is a function which loads the values from localStorage ,if any, and renders it into the bootstrap table*/
+            loaddata: function() {
+                //get length of localStorage. The number of Applicant objects in localStorage
+                var datacount = localStorage.length;
+                if (datacount > 0)
+                {
+                	//if localStorage has any elements then create a bootstrap table in dvContainer
+                	//In a string called 'render', we will constitute the HTML for rendering the bootstrap tble with the table data having the values stored in Applicant object- retrieved from localStorage
+                    var render = "<table class='table table-bordered'>"; //bordered table in bootstrap
+                    render += "<tr><th>S.No.</th><th>First Name</th><th>Last Name</th><th>Age</th>" + 
+                    "<th>Phone Number</th><th>Email</th><th>&nbsp;</th>";
+                    for (i=0; i < datacount; i++) { //for each Applicant object do
+                        var key = localStorage.key(i); // JSON stores as key-item pairs e.g. of key is 'fname','lname','age' etc
+                        var applicant = localStorage.getItem(key); //this will get the value of the item i.e. actual values input by user in the form
+                        var data = JSON.parse(applicant); //parse JSON data to retrieve the data elements
+                        render+="<tr><td>"+Number(i+1)+"</td>";
+                        render += "<td>" + data.fname + "</td><td>" + data.lname + "</td>";
+                        render += "<td>" + data.age + "</td>";
+                        render += "<td>" + data.phonenum + "</td>";
+                        render += "<td>" + data.email + "</td>";
+                        render+=
+                        "<td> <button type='button' class='btn btn-primary btn-xs edit_button'                                                                 data-toggle='modal' data-target='#myModal' data-fname='"+data.fname+"' data-lname='"+data.lname+"' data-age='"+data.age+"'  data-phonenum='"+data.phonenum+"' data-email='"+data.email+"' data-id='"+Number(i+1)+"'>Edit</button></td>";
+                    }
+                    render += "</table>";
+                    var newTable = document.getElementById("dvContainer");
+                    newTable.innerHTML = render;
+                }
+            }
+        };
+        window.onload = function() {
+            storageLogic.loaddata(); //at first, loading the existing data in localStorage to the front end table 
+      var btnsubmit = document.getElementById('btnsubmit');
+      btnsubmit.addEventListener('click', storageLogic.saveItem);// attaching the saveItem function to the Submit button. Onclick of Submit, saveItem() is executed
+        };
+    })();
+
+$(document).on( "click", '.edit_button',function(e) {
+        
+        var id = $(this).data('id');
+        alert("id = "+id);
+        var fname = $(this).data('fname');
+        alert("fname = "+fname);
+        var lname =  $(this).data('lname');
+        alert("lname = "+lname);
+        var age =  $(this).data('age');
+        alert("age = "+age);
+        var phonenum = $(this).data('phonenum');
+        alert("phonenum ="+phonenum);
+        var email = $(this).data('email');
+        alert("email = "+email);
+
+        $(".modal-id").val(id);
+        $(".modal-fname").val(fname);
+        $(".mdal-lname").val(lname);
+        $(".modal-age").val(age);
+        $(".modal-phonenum").val(phonenum);
+        $(".modal-email").val(email);
+       
+      
+
+    });
+
+  </script>
+</head>
+<body>
+<!--The bootstrap form-->
+<h2>Registration Form</h2>
+    <div class="container">
+      <form role="form">
+        <div class="form-group">
+            <label for="fname">First Name:</label>
+            <input type="text" class="form-control" id="fname" placeholder="First Name">
+        </div>
+        <div class="form-group">
+            <label for="lname">Last Name:</label>
+            <input type="text" class="form-control" id="lname" placeholder="Last Name">
+        </div>
+        <div class="form-inline">
+            <label for="age">Age: <input type="text" class="form-control" id="age" placeholder="Age"></label>
+            <label for="phone">Phone Number: <input type="text" class="form-control" id="phonenum" placeholder="Phone Number"></label>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" class="form-control" id="email" placeholder="Enter email">
+        </div>
+          <input id="btnsubmit" type="button" value="Submit" class="btn btn-success"/>
+
+      </form>
+    </div>
+    <div id="dvContainer" class="conatiner">
+    </div>
+
+
+<!---------------------------------------------------->
+  <!-- Modal for Edit button -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Edit Form Data</h4>
+         </div>
+         
+
+         <div class="modal-body">
+              <div class="form-group">
+                <input class="form-control modal-id" type="hidden" name="id">
+                <input class="form-control modal-fname" name="fname" placeholder="Enter First Name" required>
+              </div>
+              <div class="form-group">
+                 <input class="form-control modal-lname" type="hidden" name="lname">
+                  <label for="lname">Enter last name</label>
+                  <input id="modal-lname"  name="lname" type="text">
+              </div>
+
+
+              <div class="form-group">
+                <input class="form-control modal-age" type="hidden" name="age">
+                <input class="form-control modal-age" name="age" placeholder="Enter Age" required>
+              </div>
+
+              <div class="form-group">
+                <input class="form-control modal-email" type="hidden" name="email">
+                <input class="form-control modal-email" name="email" placeholder="Enter email" required>
+              </div>
+
+              <div class="form-group">
+                <input class="form-control modal-phonenum" type="hidden" name="phonenum">
+                <input class="form-control modal-phonenum" name="age" placeholder="Enter phonenum" required>
+              </div>
+              
+          </div>
+
+
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+     
+    </div>
+  </div>
+    </div>
+
+
+<!------------------------------------------------------>
+
+
+
+</body>
+</html>
